@@ -1,4 +1,4 @@
-package com.carriez.flutter_hbb
+package dev.crab.cake
 
 /**
  * Handle events from flutter
