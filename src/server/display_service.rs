@@ -24,7 +24,7 @@ lazy_static::lazy_static! {
     static ref IS_CAPTURER_MAGNIFIER_SUPPORTED: bool = is_capturer_mag_supported();
     static ref CHANGED_RESOLUTIONS: Arc<RwLock<HashMap<String, ChangedResolution>>> = Default::default();
     // Initial primary display index.
-    // It should should not be updated when displays changed.
+    // It should not be updated when displays changed.
     pub static ref PRIMARY_DISPLAY_IDX: usize = get_primary();
     static ref SYNC_DISPLAYS: Arc<Mutex<SyncDisplaysInfo>> = Default::default();
 }
@@ -80,8 +80,8 @@ pub(super) fn check_display_changed(
     let lock = SYNC_DISPLAYS.lock().unwrap();
     // If plugging out a monitor && lock.displays.get(idx) is None.
     //  1. The client version < 1.2.4. The client side has to reconnect.
-    //  2. The client version > 1.2.4, The client side can handle the case becuase sync peer info message will be sent.
-    // But it is acceptable to for the user to reconnect manually, becuase the monitor is unplugged.
+    //  2. The client version > 1.2.4, The client side can handle the case because sync peer info message will be sent.
+    // But it is acceptable to for the user to reconnect manually, because the monitor is unplugged.
     let d = lock.displays.get(idx)?;
     if ndisplay != lock.displays.len() {
         return Some(d.clone());
@@ -273,7 +273,18 @@ pub(super) fn check_update_displays(all: &Vec<Display>) {
         .iter()
         .map(|d| {
             let display_name = d.name();
-            let original_resolution = get_original_resolution(&display_name, d.width(), d.height());
+            #[allow(unused_assignments)]
+            #[allow(unused_mut)]
+            let mut scale = 1.0;
+            #[cfg(target_os = "macos")]
+            {
+                scale = d.scale();
+            }
+            let original_resolution = get_original_resolution(
+                &display_name,
+                ((d.width() as f64) / scale).round() as usize,
+                (d.height() as f64 / scale).round() as usize,
+            );
             DisplayInfo {
                 x: d.origin().0 as _,
                 y: d.origin().1 as _,
@@ -283,6 +294,7 @@ pub(super) fn check_update_displays(all: &Vec<Display>) {
                 online: d.is_online(),
                 cursor_embedded: false,
                 original_resolution,
+                scale,
                 ..Default::default()
             }
         })

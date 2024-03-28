@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -633,8 +632,8 @@ List<TToggleMenu> toolbarKeyboardToggles(FFI ffi) {
 
   // swap key
   if (ffiModel.keyboard &&
-      ((Platform.isMacOS && pi.platform != kPeerPlatformMacOS) ||
-          (!Platform.isMacOS && pi.platform == kPeerPlatformMacOS))) {
+      ((isMacOS && pi.platform != kPeerPlatformMacOS) ||
+          (!isMacOS && pi.platform == kPeerPlatformMacOS))) {
     final option = 'allow_swap_key';
     final value =
         bind.sessionGetToggleOptionSync(sessionId: sessionId, arg: option);
@@ -655,7 +654,7 @@ List<TToggleMenu> toolbarKeyboardToggles(FFI ffi) {
     var optionValue =
         bind.sessionGetReverseMouseWheelSync(sessionId: sessionId) ?? '';
     if (optionValue == '') {
-      optionValue = bind.mainGetUserDefaultOption(key: 'reverse_mouse_wheel');
+      optionValue = bind.mainGetUserDefaultOption(key: kKeyReverseMouseWheel);
     }
     onChanged(bool? value) async {
       if (value == null) return;
